@@ -32,10 +32,16 @@ jobs:
         run: |
           xcodebuild -project JUCE/extras/Projucer/Builds/MacOSX/Projucer.xcodeproj -configuration Release
 
+      - name: Set global JUCE path (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          JUCE_PATH="$(pwd)/JUCE"
+          JUCE/extras/Projucer/Builds/MacOSX/build/Release/Projucer.app/Contents/MacOS/Projucer --set-global-search-path macosx defaultJuceModulePath "$JUCE_PATH/modules"
+          JUCE/extras/Projucer/Builds/MacOSX/build/Release/Projucer.app/Contents/MacOS/Projucer --set-global-search-path macosx jucePath "$JUCE_PATH"
+
       - name: Re-export project (macOS)
         if: runner.os == 'macOS'
         run: |
-          JUCE/extras/Projucer/Builds/MacOSX/build/Release/Projucer.app/Contents/MacOS/Projucer --resave-with-temp-dir Sway.jucer || \
           JUCE/extras/Projucer/Builds/MacOSX/build/Release/Projucer.app/Contents/MacOS/Projucer --resave Sway.jucer
 
       - name: Build (macOS)
