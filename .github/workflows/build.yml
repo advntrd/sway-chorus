@@ -37,7 +37,6 @@ jobs:
         run: |
           JUCE_PATH="$(pwd)/JUCE"
           JUCE/extras/Projucer/Builds/MacOSX/build/Release/Projucer.app/Contents/MacOS/Projucer --set-global-search-path osx defaultJuceModulePath "$JUCE_PATH/modules"
-          JUCE/extras/Projucer/Builds/MacOSX/build/Release/Projucer.app/Contents/MacOS/Projucer --set-global-search-path osx jucePath "$JUCE_PATH"
 
       - name: Re-export project (macOS)
         if: runner.os == 'macOS'
