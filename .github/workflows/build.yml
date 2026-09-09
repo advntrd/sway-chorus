@@ -48,13 +48,24 @@ jobs:
         run: |
           xcodebuild -project "Builds/MacOSX/Sway.xcodeproj" -configuration Release
 
-      - name: Build Projucer and export (Windows)
+      - name: Build Projucer (Windows)
         if: runner.os == 'Windows'
         shell: cmd
         run: |
           cd JUCE\extras\Projucer\Builds\VisualStudio2022
           msbuild Projucer.sln /p:Configuration=Release
           cd ..\..\..\..\..
+
+      - name: Set global JUCE path (Windows)
+        if: runner.os == 'Windows'
+        shell: cmd
+        run: |
+          "JUCE\extras\Projucer\Builds\VisualStudio2022\x64\Release\App\Projucer.exe" --set-global-search-path windows defaultJuceModulePath "%cd%\JUCE\modules"
+
+      - name: Re-export project (Windows)
+        if: runner.os == 'Windows'
+        shell: cmd
+        run: |
           "JUCE\extras\Projucer\Builds\VisualStudio2022\x64\Release\App\Projucer.exe" --resave Sway.jucer
 
       - name: Build (Windows)
