@@ -3,6 +3,7 @@ name: Build Sway
 on:
   push:
     branches: [ main ]
+    tags: [ 'v*' ]
   workflow_dispatch:
 
 jobs:
@@ -75,18 +76,37 @@ jobs:
           cd Builds\VisualStudio2026
           msbuild Sway.sln /p:Configuration=Release
 
+      - name: Package macOS zip
+        if: runner.os == 'macOS'
+        run: |
+          cd Builds/MacOSX/build/Release
+          zip -r Sway-macOS.zip *.vst3 *.component
+
+      - name: Package Windows zip
+        if: runner.os == 'Windows'
+        shell: cmd
+        run: |
+          cd Builds\VisualStudio2026\x64\Release\VST3
+          powershell Compress-Archive -Path *.vst3 -DestinationPath Sway-Windows.zip
+
       - name: Upload build artifacts (macOS)
         if: runner.os == 'macOS'
         uses: actions/upload-artifact@v4
         with:
           name: Sway-macOS
-          path: |
-            Builds/MacOSX/build/Release/*.vst3
-            Builds/MacOSX/build/Release/*.component
+          path: Builds/MacOSX/build/Release/Sway-macOS.zip
 
       - name: Upload build artifacts (Windows)
         if: runner.os == 'Windows'
         uses: actions/upload-artifact@v4
         with:
           name: Sway-Windows
-          path: Builds/VisualStudio2026/x64/Release/VST3/*.vst3
+          path: Builds/VisualStudio2026/x64/Release/VST3/Sway-Windows.zip
+
+      - name: Create Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            Builds/MacOSX/build/Release/Sway-macOS.zip
+            Builds/VisualStudio2026/x64/Release/VST3/Sway-Windows.zip
