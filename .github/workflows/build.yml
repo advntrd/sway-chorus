@@ -1,0 +1,69 @@
+name: Build Sway
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Checkout JUCE
+        uses: actions/checkout@v4
+        with:
+          repository: juce-framework/JUCE
+          ref: master
+          path: JUCE
+
+      - name: Build Projucer and export (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          cd JUCE
+          xcodebuild -project extras/Projucer/Builds/MacOSX/Projucer.xcodeproj -configuration Release
+          cd ..
+          JUCE/extras/Projucer/Builds/MacOSX/build/Release/Projucer.app/Contents/MacOS/Projucer --resave Sway.jucer
+
+      - name: Build (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          xcodebuild -project "Builds/MacOSX/Sway.xcodeproj" -configuration Release
+
+      - name: Build Projucer and export (Windows)
+        if: runner.os == 'Windows'
+        shell: cmd
+        run: |
+          cd JUCE\extras\Projucer\Builds\VisualStudio2022
+          msbuild Projucer.sln /p:Configuration=Release
+          cd ..\..\..\..\..
+          "JUCE\extras\Projucer\Builds\VisualStudio2022\x64\Release\App\Projucer.exe" --resave Sway.jucer
+
+      - name: Build (Windows)
+        if: runner.os == 'Windows'
+        shell: cmd
+        run: |
+          cd Builds\VisualStudio2026
+          msbuild Sway.sln /p:Configuration=Release
+
+      - name: Upload build artifacts (macOS)
+        if: runner.os == 'macOS'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Sway-macOS
+          path: |
+            Builds/MacOSX/build/Release/*.vst3
+            Builds/MacOSX/build/Release/*.component
+
+      - name: Upload build artifacts (Windows)
+        if: runner.os == 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Sway-Windows
+          path: Builds/VisualStudio2026/x64/Release/VST3/*.vst3
