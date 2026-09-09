@@ -27,14 +27,6 @@ jobs:
         if: runner.os == 'Windows'
         uses: microsoft/setup-msbuild@v2
 
-      - name: Build Projucer and export (macOS)
-        if: runner.os == 'macOS'
-        run: |
-          cd JUCE
-          xcodebuild -project extras/Projucer/Builds/MacOSX/Projucer.xcodeproj -configuration Release
-          cd ..
-          JUCE/extras/Projucer/Builds/MacOSX/build/Release/Projucer.app/Contents/MacOS/Projucer --resave Sway.jucer
-
       - name: Build (macOS)
         if: runner.os == 'macOS'
         run: |
