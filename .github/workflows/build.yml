@@ -23,6 +23,10 @@ jobs:
           ref: master
           path: JUCE
 
+      - name: Setup MSBuild
+        if: runner.os == 'Windows'
+        uses: microsoft/setup-msbuild@v2
+
       - name: Build Projucer and export (macOS)
         if: runner.os == 'macOS'
         run: |
